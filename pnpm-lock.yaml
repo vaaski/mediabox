@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@acab/reset.css': ^0.5.3
   '@tauri-apps/api': ^1.2.0
   '@tauri-apps/cli': ^1.2.2
   '@types/node': ^18.7.10
@@ -11,6 +12,7 @@ specifiers:
   vue-tsc: ^1.0.11
 
 dependencies:
+  '@acab/reset.css': 0.5.3
   '@tauri-apps/api': 1.2.0
   vue: 3.2.47
 
@@ -23,6 +25,10 @@ devDependencies:
   vue-tsc: 1.2.0_typescript@4.9.5
 
 packages:
+
+  /@acab/reset.css/0.5.3:
+    resolution: {integrity: sha512-pICfxGIMPgPCEm3lCpA16c00IKnpLeZmt7VtNoNfQX38jx7GuP0uEaUkU/QSxbWJaLmvAFpUJHwCLYZrMt2K7w==}
+    dev: false
 
   /@babel/helper-string-parser/7.19.4:
     resolution: {integrity: sha512-nHtDoQcuqFmwYNYPz3Rah5ph2p8PFeFCsZk9A/48dPc/rGocJ5J3hAAZ7pb76VWX3fZKu+uEr/FhH5jLx7umrw==}
