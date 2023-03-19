@@ -26,6 +26,7 @@
       "shell": {
         "execute": true,
         "scope": [
+          { "name": "ffmpeg", "cmd": "ffmpeg", "args": true },
           { "name": "yt-dlp", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
           { "name": "chmod", "cmd": "chmod", "args": true }
         ]
