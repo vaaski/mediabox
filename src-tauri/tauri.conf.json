@@ -14,13 +14,24 @@
     "allowlist": {
       "all": false,
       "http": {
-        "all": true,
         "request": true,
         "scope": ["https://github.com/*"]
       },
-      "shell": {
+      "fs": {
         "all": false,
-        "open": true
+        "createDir": true,
+        "scope": ["$HOME/.mediabox", "$HOME/.mediabox/*", "$DOWNLOAD/*"],
+        "writeFile": true
+      },
+      "shell": {
+        "execute": true,
+        "scope": [
+          { "name": "yt-dlp", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
+          { "name": "chmod", "cmd": "chmod", "args": true }
+        ]
+      },
+      "path": {
+        "all": true
       }
     },
     "bundle": {
