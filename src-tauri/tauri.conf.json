@@ -13,6 +13,17 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
+      },
       "http": {
         "request": true,
         "scope": ["https://github.com/*"]
@@ -58,7 +69,8 @@
         "title": "mediabox",
         "width": 800,
         "height": 600,
-        "transparent": true
+        "transparent": true,
+        "decorations": false
       }
     ]
   }
