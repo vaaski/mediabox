@@ -19,13 +19,13 @@ const log = async (msg: string) => {
 const output = ref("")
 const spawnChild = async () => {
   const child = new Command("yt-dlp", ["--version"])
-  child.stdout.on("data", (data) => {
+  child.stdout.on("data", data => {
     log(data)
   })
-  child.stderr.on("data", (data) => {
+  child.stderr.on("data", data => {
     log(data)
   })
-  child.on("close", (data) => {
+  child.on("close", data => {
     log(`child process exited with code ${data.code}`)
   })
   await child.spawn()
@@ -39,7 +39,7 @@ const downloadBinary = async () => {
     "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos",
     {
       responseType: ResponseType.Binary,
-    },
+    }
   )
 
   if (!Array.isArray(request.data)) {
@@ -54,7 +54,7 @@ const downloadBinary = async () => {
   log(`setting permissions for ${ytdlDir}`)
 
   const chmod = new Command("chmod", ["+x", ytdlDir])
-  chmod.on("close", (data) => {
+  chmod.on("close", data => {
     output.value += `\nchmod process exited with code ${data.code}`
   })
   await chmod.spawn()
@@ -69,7 +69,7 @@ const downloadVideo = async () => {
   const ytdlp = new Command("yt-dlp", ["--remux-video", "mp4", "-P", downloadPath, url])
   ytdlp.stdout.on("data", log)
   ytdlp.stderr.on("data", log)
-  ytdlp.on("close", (data) => {
+  ytdlp.on("close", data => {
     log(`yt-dlp process exited with code ${data.code}`)
   })
   await ytdlp.spawn()
