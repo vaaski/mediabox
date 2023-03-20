@@ -4,11 +4,13 @@ import { Command } from "@tauri-apps/api/shell"
 import { getClient, ResponseType } from "@tauri-apps/api/http"
 import { writeBinaryFile, BaseDirectory, createDir } from "@tauri-apps/api/fs"
 import { downloadDir, homeDir, join } from "@tauri-apps/api/path"
+import { platformName } from "../util"
 
+const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
 const log = async (msg: string) => {
   console.log(msg)
-  output.value += "\n" + msg
+  outputLog.value += msg + "\n"
 
   if (!logElement.value) return
   await nextTick()
@@ -16,8 +18,45 @@ const log = async (msg: string) => {
   logElement.value.scrollTop = logElement.value.scrollHeight
 }
 
-const output = ref("")
-const spawnChild = async () => {
+const downloadURL =
+  platformName === "win32"
+    ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+    : "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"
+
+const fileName = platformName === "win32" ? "yt-dlp.exe" : "yt-dlp"
+
+const downloadBinary = async () => {
+  const client = await getClient()
+  const ytdlPath = await join(await homeDir(), `.mediabox/${fileName}`)
+
+  log(`downloading binary for ${platformName}`)
+  log(`from ${downloadURL}`)
+  const request = await client.get(downloadURL, {
+    responseType: ResponseType.Binary,
+  })
+
+  if (!Array.isArray(request.data)) {
+    throw "request.data is not an array"
+  }
+
+  log(`writing binary to ${ytdlPath}`)
+  await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
+  await writeBinaryFile(`.mediabox/${fileName}`, request.data, { dir: BaseDirectory.Home })
+
+  if (platformName !== "win32") {
+    log(`setting permissions for ${ytdlPath}`)
+
+    const chmod = new Command("chmod", ["+x", ytdlPath])
+    chmod.on("close", data => {
+      outputLog.value += `\nchmod process exited with code ${data.code}`
+    })
+    await chmod.spawn()
+  }
+
+  log("done")
+}
+
+const testYTDLP = async () => {
   const child = new Command("yt-dlp", ["--version"])
   child.stdout.on("data", data => {
     log(data)
@@ -29,37 +68,6 @@ const spawnChild = async () => {
     log(`child process exited with code ${data.code}`)
   })
   await child.spawn()
-}
-
-const downloadBinary = async () => {
-  const client = await getClient()
-
-  log("downloading binary")
-  const request = await client.get(
-    "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos",
-    {
-      responseType: ResponseType.Binary,
-    }
-  )
-
-  if (!Array.isArray(request.data)) {
-    throw "request.data is not an array"
-  }
-
-  log("writing binary")
-  await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
-  await writeBinaryFile(".mediabox/yt-dlp", request.data, { dir: BaseDirectory.Home })
-
-  const ytdlDir = await join(await homeDir(), ".mediabox/yt-dlp")
-  log(`setting permissions for ${ytdlDir}`)
-
-  const chmod = new Command("chmod", ["+x", ytdlDir])
-  chmod.on("close", data => {
-    output.value += `\nchmod process exited with code ${data.code}`
-  })
-  await chmod.spawn()
-
-  log("done")
 }
 
 const downloadVideo = async () => {
@@ -78,10 +86,10 @@ const downloadVideo = async () => {
 
 <template>
   <div class="wrap">
-    <pre ref="logElement">{{ output }}</pre>
+    <pre ref="logElement">{{ outputLog }}</pre>
     <div class="controls">
       <button @click="downloadBinary">download yt-dlp</button>
-      <button @click="spawnChild">yt-dlp --version</button>
+      <button @click="testYTDLP">yt-dlp --version</button>
       <button @click="downloadVideo">download sample video</button>
     </div>
   </div>
@@ -107,5 +115,4 @@ pre {
   border-radius: 5px;
   overflow-y: auto;
 }
-
 </style>

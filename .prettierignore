@@ -1,2 +1,2 @@
-src-tauri/**/*
+src-tauri/target/**/*
 pnpm-lock.yaml

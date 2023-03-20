@@ -1,8 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { platformName } from "../util"
+</script>
 
 <template>
   <main class="home">
-    <h1>mediabox POC</h1>
+    <h1>mediabox PoC ({{ platformName }})</h1>
     <div class="links">
       <RouterLink to="/ytdlp">download</RouterLink>
       <RouterLink disabled title="coming soon™" to="/ytdlp">convert</RouterLink>
