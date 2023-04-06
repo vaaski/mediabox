@@ -4,7 +4,7 @@ import { Command } from "@tauri-apps/api/shell"
 import { getClient, ResponseType } from "@tauri-apps/api/http"
 import { writeBinaryFile, BaseDirectory, createDir } from "@tauri-apps/api/fs"
 import { downloadDir, homeDir, join } from "@tauri-apps/api/path"
-import { platformName } from "../util"
+import { platform } from "@tauri-apps/api/os"
 
 const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
@@ -18,15 +18,16 @@ const log = async (msg: string) => {
   logElement.value.scrollTop = logElement.value.scrollHeight
 }
 
-const downloadURL =
-  platformName === "win32"
-    ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-    : "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"
-
-const fileName = platformName === "win32" ? "yt-dlp.exe" : "yt-dlp"
-
 const downloadBinary = async () => {
+  const platformName = await platform()
   const client = await getClient()
+
+  const fileName = platformName === "win32" ? "yt-dlp.exe" : "yt-dlp"
+  const downloadURL =
+    platformName === "win32"
+      ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+      : "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"
+
   const ytdlPath = await join(await homeDir(), `.mediabox/${fileName}`)
 
   log(`downloading binary for ${platformName}`)
@@ -41,7 +42,9 @@ const downloadBinary = async () => {
 
   log(`writing binary to ${ytdlPath}`)
   await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
-  await writeBinaryFile(`.mediabox/${fileName}`, request.data, { dir: BaseDirectory.Home })
+  await writeBinaryFile(`.mediabox/${fileName}`, request.data, {
+    dir: BaseDirectory.Home,
+  })
 
   if (platformName !== "win32") {
     log(`setting permissions for ${ytdlPath}`)

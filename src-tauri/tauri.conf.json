@@ -70,10 +70,11 @@
         "fullscreen": false,
         "resizable": true,
         "title": "mediabox",
-        "width": 800,
-        "height": 600,
+        "width": 600,
+        "height": 400,
         "transparent": true,
-        "decorations": false
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ]
   }
