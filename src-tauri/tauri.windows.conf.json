@@ -1,0 +1,15 @@
+{
+  "tauri": {
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "mediabox",
+        "width": 830,
+        "height": 550,
+        "transparent": true,
+        "decorations": false
+      }
+    ]
+  }
+}
