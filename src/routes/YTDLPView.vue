@@ -12,8 +12,15 @@ const logElement = ref<HTMLPreElement>()
 watch(accumulatedLog, async () => {
   if (!logElement.value) return
 
+  const isAtBottom =
+    logElement.value.scrollTop ===
+    logElement.value.scrollHeight - logElement.value.clientHeight
+
+  if (!isAtBottom) return
+
   await nextTick()
-  logElement.value.scrollTop = logElement.value.scrollHeight
+  logElement.value.scrollTop =
+    logElement.value.scrollHeight - logElement.value.clientHeight
 })
 
 const downloadFFmpeg = async () => {
