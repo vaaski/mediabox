@@ -18,9 +18,9 @@ const topFrameHeight = computed(() => (isMac.value ? "28px" : "32px"))
       <div id="spacer" class="no-touchy"></div>
 
       <div id="top-bar-right">
-        <div class="window-control" id="min" @click="appWindow.minimize">min</div>
-        <div class="window-control" id="max" @click="appWindow.toggleMaximize">max</div>
-        <div class="window-control" id="close" @click="appWindow.close">close</div>
+        <div id="min" class="window-control" @click="appWindow.minimize">min</div>
+        <div id="max" class="window-control" @click="appWindow.toggleMaximize">max</div>
+        <div id="close" class="window-control" @click="appWindow.close">close</div>
       </div>
     </div>
     <div id="route">

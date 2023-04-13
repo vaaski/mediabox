@@ -7,9 +7,9 @@ import { invoke } from "@tauri-apps/api"
 
 const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
-const log = async (msg: string) => {
-  console.log(msg)
-  outputLog.value += msg + "\n"
+const log = async (message: string) => {
+  console.log(message)
+  outputLog.value += message + "\n"
 
   if (!logElement.value) return
   await nextTick()

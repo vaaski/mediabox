@@ -8,20 +8,33 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:vue/vue3-recommended",
     "plugin:unicorn/recommended"
   ],
-  "parser": "@typescript-eslint/parser",
+  "parser": "vue-eslint-parser",
   "parserOptions": {
+    "parser": "@typescript-eslint/parser",
     "ecmaVersion": 12,
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint", "unicorn"],
-  "ignorePatterns": ["node_modules/**", "dist/**"],
+  "ignorePatterns": ["node_modules/**", "dist/**", "src-tauri/**"],
   "rules": {
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/consistent-type-imports": "error",
     "semi": ["error", "never"],
     "unicorn/prefer-ternary": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "rules": {
+        "unicorn/filename-case": "off",
+        "vue/html-self-closing": "off",
+        "vue/max-attributes-per-line": "off",
+        "vue/singleline-html-element-content-newline": "off"
+      }
+    }
+  ]
 }
