@@ -2,7 +2,7 @@
 import { nextTick, ref } from "vue"
 import { Command } from "@tauri-apps/api/shell"
 import { downloadDir } from "@tauri-apps/api/path"
-import { YTDLPInfo, ensureExecutable } from "../download-executables"
+import { FFmpegInfo, YTDLPInfo, ensureExecutable } from "../download-executables"
 
 const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
@@ -16,7 +16,32 @@ const log = async (message: string) => {
   logElement.value.scrollTop = logElement.value.scrollHeight
 }
 
-const downloadBinary = async () => {
+const downloadFFmpeg = async () => {
+  const path = await ensureExecutable(FFmpegInfo)
+  log(path)
+}
+
+const testFFmpeg = async () => {
+  const start = performance.now()
+
+  log("testing ffmpeg...")
+  const child = new Command("ffmpeg", ["-version"])
+  child.stdout.on("data", data => {
+    log(data)
+  })
+  child.stderr.on("data", data => {
+    log(data)
+  })
+  child.on("close", data => {
+    log(`child process exited with code ${data.code}`)
+
+    const end = performance.now()
+    log(`done after ${(end - start) / 1000} seconds`)
+  })
+  await child.spawn()
+}
+
+const downloadYTDLP = async () => {
   const path = await ensureExecutable(YTDLPInfo)
   log(path)
 }
@@ -59,9 +84,13 @@ const downloadVideo = async () => {
   <div class="wrap">
     <pre ref="logElement">{{ outputLog }}</pre>
     <div class="controls">
-      <button @click="downloadBinary">download yt-dlp</button>
-      <button @click="testYTDLP">yt-dlp --version</button>
+      <button @click="downloadYTDLP">download yt-dlp</button>
+      <button @click="testYTDLP">test yt-dlp</button>
       <button @click="downloadVideo">download sample video</button>
+    </div>
+    <div class="controls">
+      <button @click="downloadFFmpeg">download ffmpeg</button>
+      <button @click="testFFmpeg">test ffmpeg</button>
     </div>
   </div>
 </template>

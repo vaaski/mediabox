@@ -31,15 +31,17 @@
       "fs": {
         "all": false,
         "createDir": true,
+        "removeFile": true,
         "scope": ["$HOME/.mediabox", "$HOME/.mediabox/*", "$DOWNLOAD/*"],
         "exists": true
       },
       "shell": {
         "execute": true,
         "scope": [
-          { "name": "ffmpeg", "cmd": "ffmpeg", "args": true },
+          { "name": "ffmpeg", "cmd": "$HOME/.mediabox/ffmpeg", "args": true },
           { "name": "yt-dlp", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
-          { "name": "chmod", "cmd": "chmod", "args": true }
+          { "name": "chmod", "cmd": "chmod", "args": true },
+          { "name": "unzip", "cmd": "unzip", "args": true }
         ]
       },
       "path": {
