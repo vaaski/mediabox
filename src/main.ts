@@ -14,7 +14,4 @@ if (import.meta.env.PROD) {
   })
 }
 
-// import { invoke } from "@tauri-apps/api"
-// window.invoke = invoke
-
 createApp(App).use(router).mount("#app")

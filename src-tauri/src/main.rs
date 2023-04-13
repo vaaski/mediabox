@@ -7,9 +7,9 @@
     windows_subsystem = "windows"
 )]
 
+use reqwest::Error;
 use tauri::Manager;
 use window_vibrancy::{apply_blur, apply_vibrancy, NSVisualEffectMaterial};
-use reqwest::Error;
 
 async fn download_file(url: String, path: &str) -> Result<String, Error> {
     let client = reqwest::Client::new();
@@ -61,8 +61,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![download_command])
-        .invoke_handler(tauri::generate_handler![get_core_count])
+        .invoke_handler(tauri::generate_handler![get_core_count, download_command])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
