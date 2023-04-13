@@ -1,74 +1,74 @@
 <script setup lang="ts">
-import { nextTick, ref } from "vue"
+import { nextTick, ref, watch } from "vue"
 import { Command } from "@tauri-apps/api/shell"
 import { downloadDir } from "@tauri-apps/api/path"
 import { FFmpegInfo, YTDLPInfo, ensureExecutable } from "../download-executables"
+import { accumulatedLog, makeLogger } from "../logging"
 
-const outputLog = ref("")
+const ffmpegLog = makeLogger("ffmpeg")
+const ytdlpLog = makeLogger("ytdlp")
+
 const logElement = ref<HTMLPreElement>()
-const log = async (message: string) => {
-  console.log(message)
-  outputLog.value += message + "\n"
-
+watch(accumulatedLog, async () => {
   if (!logElement.value) return
-  await nextTick()
 
+  await nextTick()
   logElement.value.scrollTop = logElement.value.scrollHeight
-}
+})
 
 const downloadFFmpeg = async () => {
   const path = await ensureExecutable(FFmpegInfo)
-  log(path)
+  ffmpegLog(`downloaded ffmpeg to ${path}`)
 }
 
 const testFFmpeg = async () => {
   const start = performance.now()
 
-  log("testing ffmpeg...")
+  ffmpegLog("testing ffmpeg...")
   const child = new Command("ffmpeg", ["-version"])
   child.stdout.on("data", data => {
-    log(data)
+    ffmpegLog(data)
   })
   child.stderr.on("data", data => {
-    log(data)
+    ffmpegLog(data)
   })
   child.on("close", data => {
-    log(`child process exited with code ${data.code}`)
+    ffmpegLog(`child process exited with code ${data.code}`)
 
     const end = performance.now()
-    log(`done after ${(end - start) / 1000} seconds`)
+    ffmpegLog(`done after ${(end - start) / 1000} seconds`)
   })
   await child.spawn()
 }
 
 const downloadYTDLP = async () => {
   const path = await ensureExecutable(YTDLPInfo)
-  log(path)
+  ytdlpLog(`downloaded yt-dlp to ${path}`)
 }
 
 const testYTDLP = async () => {
   const start = performance.now()
 
-  log("testing yt-dlp...")
+  ytdlpLog("testing yt-dlp...")
   const child = new Command("yt-dlp", ["--version"])
   child.stdout.on("data", data => {
-    log(data)
+    ytdlpLog(data)
   })
   child.stderr.on("data", data => {
-    log(data)
+    ytdlpLog(data)
   })
   child.on("close", data => {
-    log(`child process exited with code ${data.code}`)
+    ytdlpLog(`child process exited with code ${data.code}`)
 
     const end = performance.now()
-    log(`done after ${(end - start) / 1000} seconds`)
+    ytdlpLog(`done after ${(end - start) / 1000} seconds`)
   })
   await child.spawn()
 }
 
 const downloadVideo = async () => {
   const url = "https://www.youtube.com/watch?v=9bZkp7q19f0"
-  log(`downloading ${url}...`)
+  ytdlpLog(`downloading ${url}...`)
 
   const downloadPath = await downloadDir()
   const ffmpegPath = await ensureExecutable(FFmpegInfo)
@@ -82,10 +82,10 @@ const downloadVideo = async () => {
     url,
   ])
 
-  ytdlp.stdout.on("data", log)
-  ytdlp.stderr.on("data", log)
+  ytdlp.stdout.on("data", ytdlpLog)
+  ytdlp.stderr.on("data", ytdlpLog)
   ytdlp.on("close", data => {
-    log(`yt-dlp process exited with code ${data.code}`)
+    ytdlpLog(`yt-dlp process exited with code ${data.code}`)
   })
   await ytdlp.spawn()
 }
@@ -93,7 +93,7 @@ const downloadVideo = async () => {
 
 <template>
   <div class="wrap">
-    <pre ref="logElement">{{ outputLog }}</pre>
+    <pre ref="logElement">{{ accumulatedLog }}</pre>
     <div class="controls">
       <button @click="downloadYTDLP">download yt-dlp</button>
       <button @click="testYTDLP">test yt-dlp</button>

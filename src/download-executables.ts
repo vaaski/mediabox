@@ -5,6 +5,9 @@ import { BaseDirectory, join } from "@tauri-apps/api/path"
 import { invoke } from "@tauri-apps/api"
 import { Command } from "@tauri-apps/api/shell"
 import { createDir, exists, removeFile } from "@tauri-apps/api/fs"
+import { makeLogger } from "./logging"
+
+const log = makeLogger("DL-EXEC")
 
 type Platforms = Awaited<ReturnType<typeof platform>>
 type ExecutableDownloadInfo = {
@@ -47,6 +50,7 @@ const unzip = async (zipPath: string, containedFileName: string) => {
   const currentPlatform = await platform()
   const outFolder = await join(zipPath, "..")
   const outPath = await join(outFolder, containedFileName)
+  log(`unzipping ${containedFileName} from ${zipPath} to ${outPath}`)
 
   return new Promise<string>((resolve, reject) => {
     if (currentPlatform === "darwin") {
@@ -70,6 +74,8 @@ const unzip = async (zipPath: string, containedFileName: string) => {
 }
 
 const chmodPlusX = async (path: string) => {
+  log(`chmod +x ${path}`)
+
   return new Promise<void>((resolve, reject) => {
     const chmod = new Command("chmod", ["+x", path])
     chmod.on("close", resolve)
@@ -89,7 +95,7 @@ export const getPlatformInfo = async (info: ExecutableDownloadInfoList) => {
 
 export const downloadExecutable = async (info: ExecutableDownloadInfo) => {
   await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
-  console.log("downloading executable", info)
+  log("downloading executable", info)
 
   const currentPlatform = await platform()
   const downloadPath = await join(
@@ -102,7 +108,7 @@ export const downloadExecutable = async (info: ExecutableDownloadInfo) => {
   let binaryPath = downloadPath
   if (info.zippedFilename) {
     binaryPath = await unzip(downloadPath, info.filename)
-    console.log("unzipped binary to", binaryPath)
+    log("unzipped binary to", binaryPath)
   }
 
   if (currentPlatform !== "win32") {
@@ -116,6 +122,8 @@ export const ensureExecutable = async (info: ExecutableDownloadInfoList) => {
   const currentInfo = await getPlatformInfo(info)
   const downloadPath = await join(await MEDIABOX_FOLDER_PATH(), currentInfo.filename)
 
-  if (await exists(downloadPath)) return downloadPath
-  else return await downloadExecutable(currentInfo)
+  if (await exists(downloadPath)) {
+    log("executable already exists", downloadPath)
+    return downloadPath
+  } else return await downloadExecutable(currentInfo)
 }

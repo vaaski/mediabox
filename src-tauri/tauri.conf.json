@@ -72,8 +72,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "mediabox",
-        "width": 600,
-        "height": 400,
+        "width": 830,
+        "height": 550,
         "transparent": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true
