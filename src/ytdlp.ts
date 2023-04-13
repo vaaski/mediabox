@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api"
 import { readTextFile } from "@tauri-apps/api/fs"
 import { downloadDir, join } from "@tauri-apps/api/path"
 import { Command } from "@tauri-apps/api/shell"
@@ -47,4 +48,36 @@ export const loadVideoInfo = async (path: string) => {
   const json = JSON.parse(contents)
 
   return json
+}
+
+export const downloadVideoFromInfoFile = async (infoJsonPath: string) => {
+  const downloadFolder = await downloadDir()
+  const ffmpegPath = await ensureExecutable(FFmpegInfo)
+  const coreCount = await invoke<number>("get_core_count")
+  ytdlpLog(`core count: ${coreCount}`)
+
+  return new Promise<void>((resolve, reject) => {
+    const ytdlp = new Command("yt-dlp", [
+      "--ffmpeg-location",
+      ffmpegPath,
+      "-P",
+      downloadFolder,
+      "-N",
+      coreCount.toString(),
+
+      "--load-info-json",
+      infoJsonPath,
+    ])
+
+    ytdlp.stdout.on("data", ytdlpLog)
+    ytdlp.stderr.on("data", ytdlpLog)
+
+    ytdlp.on("error", reject)
+    ytdlp.on("close", data => {
+      ytdlpLog(`yt-dlp process exited with code ${data.code}`)
+      resolve()
+    })
+
+    ytdlp.spawn()
+  })
 }

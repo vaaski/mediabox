@@ -4,7 +4,7 @@ import { Command } from "@tauri-apps/api/shell"
 
 import { FFmpegInfo, YTDLPInfo, ensureExecutable } from "../download-executables"
 import { accumulatedLog, makeLogger } from "../logging"
-import { downloadVideoInfo, loadVideoInfo } from "../ytdlp"
+import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")
@@ -80,27 +80,8 @@ const sampleVideoInfo = async () => {
   const { title, id } = await loadVideoInfo(infoPath)
   ytdlpLog({ title, id })
 
-  // ytdlpLog(`downloading ${url}...`)
-
-  // const downloadPath = await downloadDir()
-  // const ffmpegPath = await ensureExecutable(FFmpegInfo)
-  // const ytdlp = new Command("yt-dlp", [
-  //   "--skip-download",
-  //   "--ffmpeg-location",
-  //   ffmpegPath,
-  //   "--remux-video",
-  //   "mp4",
-  //   "-P",
-  //   downloadPath,
-  //   url,
-  // ])
-
-  // ytdlp.stdout.on("data", ytdlpLog)
-  // ytdlp.stderr.on("data", ytdlpLog)
-  // ytdlp.on("close", data => {
-  //   ytdlpLog(`yt-dlp process exited with code ${data.code}`)
-  // })
-  // await ytdlp.spawn()
+  ytdlpLog("downloading video from info")
+  await downloadVideoFromInfoFile(infoPath)
 }
 </script>
 

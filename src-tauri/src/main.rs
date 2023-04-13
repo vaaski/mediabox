@@ -9,13 +9,6 @@
 
 use tauri::Manager;
 use window_vibrancy::{apply_blur, apply_vibrancy, NSVisualEffectMaterial};
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 use reqwest::Error;
 
 async fn download_file(url: String, path: &str) -> Result<String, Error> {
@@ -41,6 +34,11 @@ async fn download_command(url: String, path: String) -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+fn get_core_count() -> Result<u32, String> {
+    Ok(num_cpus::get() as u32)
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -63,8 +61,8 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
         .invoke_handler(tauri::generate_handler![download_command])
+        .invoke_handler(tauri::generate_handler![get_core_count])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
