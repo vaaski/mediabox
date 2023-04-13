@@ -4,13 +4,12 @@ import { appWindow } from "@tauri-apps/api/window"
 import { platformName } from "./util"
 import { computed } from "vue"
 
-const isMac = computed(() => platformName.value === "darwin")
-const topFrameHeight = computed(() => (isMac.value ? "28px" : "32px"))
+const topFrameHeight = computed(() => (platformName.value === "darwin" ? "28px" : "32px"))
 </script>
 
 <template>
-  <div id="frame">
-    <div id="top-bar" data-tauri-drag-region :class="{ isMac }">
+  <div id="frame" :class="platformName">
+    <div id="top-bar" data-tauri-drag-region>
       <div id="top-bar-left" class="no-touchy">
         <div id="top-bar-title">mediabox</div>
       </div>
@@ -53,10 +52,6 @@ const topFrameHeight = computed(() => (isMac.value ? "28px" : "32px"))
     flex-grow: 1;
   }
 
-  &.isMac > * {
-    display: none;
-  }
-
   &-left,
   &-right {
     display: flex;
@@ -92,5 +87,17 @@ const topFrameHeight = computed(() => (isMac.value ? "28px" : "32px"))
 
   background: var(--c-active-bg);
   border-radius: 6.66px;
+}
+
+#frame.darwin {
+  #top-bar > * {
+    display: none;
+  }
+}
+
+#frame.win32 {
+  #route {
+    border-radius: 6.66px 6.66px 0 0;
+  }
 }
 </style>
