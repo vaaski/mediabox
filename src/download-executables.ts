@@ -40,7 +40,15 @@ const chmodPlusX = async (path: string) => {
   })
 }
 
-const downloadExecutable = async (info: ExecutableDownloadInfo) => {
+export const getPlatformInfo = async (info: ExecutableDownloadInfoList) => {
+  const currentPlatform = await platform()
+  const currentInfo = info[currentPlatform] ?? info.linux
+  if (!currentInfo) throw new Error("No executable download info for this platform")
+
+  return currentInfo
+}
+
+export const downloadExecutable = async (info: ExecutableDownloadInfo) => {
   console.log("downloading executable", info)
 
   const currentPlatform = await platform()
@@ -58,10 +66,7 @@ const downloadExecutable = async (info: ExecutableDownloadInfo) => {
 }
 
 export const ensureExecutable = async (info: ExecutableDownloadInfoList) => {
-  const currentPlatform = await platform()
-  const currentInfo = info[currentPlatform] ?? info.linux
-  if (!currentInfo) throw new Error("No executable download info for this platform")
-
+  const currentInfo = await getPlatformInfo(info)
   const downloadPath = await join(await MEDIABOX_FOLDER_PATH(), currentInfo.filename)
 
   if (await exists(downloadPath)) return downloadPath
