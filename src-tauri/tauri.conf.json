@@ -32,7 +32,7 @@
         "all": false,
         "createDir": true,
         "scope": ["$HOME/.mediabox", "$HOME/.mediabox/*", "$DOWNLOAD/*"],
-        "writeFile": true
+        "exists": true
       },
       "shell": {
         "execute": true,

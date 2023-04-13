@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { nextTick, ref } from "vue"
 import { Command } from "@tauri-apps/api/shell"
-import { downloadDir, homeDir, join } from "@tauri-apps/api/path"
-import { platform } from "@tauri-apps/api/os"
-import { invoke } from "@tauri-apps/api"
+import { downloadDir } from "@tauri-apps/api/path"
+import { YTDLPInfo, ensureExecutable } from "../download-executables"
 
 const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
@@ -18,38 +17,8 @@ const log = async (message: string) => {
 }
 
 const downloadBinary = async () => {
-  const start = performance.now()
-  const platformName = await platform()
-
-  const fileName = platformName === "win32" ? "yt-dlp.exe" : "yt-dlp"
-  const downloadURL =
-    platformName === "win32"
-      ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-      : "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"
-
-  const ytdlPath = await join(await homeDir(), `.mediabox/${fileName}`)
-
-  log(`downloading binary for ${platformName}`)
-  log(`from ${downloadURL}`)
-
-  const resultPath = await invoke<string>("download_command", {
-    url: downloadURL,
-    path: ytdlPath,
-  })
-  log(`wrote binary to ${resultPath}`)
-
-  if (platformName !== "win32") {
-    log(`setting permissions for ${ytdlPath}`)
-
-    const chmod = new Command("chmod", ["+x", ytdlPath])
-    chmod.on("close", data => {
-      log(`chmod process exited with code ${data.code}`)
-    })
-    await chmod.spawn()
-  }
-
-  const end = performance.now()
-  log(`done after ${(end - start) / 1000} seconds`)
+  const path = await ensureExecutable(YTDLPInfo)
+  log(path)
 }
 
 const testYTDLP = async () => {
