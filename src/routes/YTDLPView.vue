@@ -69,8 +69,19 @@ const testYTDLP = async () => {
 const downloadVideo = async () => {
   const url = "https://www.youtube.com/watch?v=9bZkp7q19f0"
   log(`downloading ${url}...`)
+
   const downloadPath = await downloadDir()
-  const ytdlp = new Command("yt-dlp", ["--remux-video", "mp4", "-P", downloadPath, url])
+  const ffmpegPath = await ensureExecutable(FFmpegInfo)
+  const ytdlp = new Command("yt-dlp", [
+    "--ffmpeg-location",
+    ffmpegPath,
+    "--remux-video",
+    "mp4",
+    "-P",
+    downloadPath,
+    url,
+  ])
+
   ytdlp.stdout.on("data", log)
   ytdlp.stderr.on("data", log)
   ytdlp.on("close", data => {

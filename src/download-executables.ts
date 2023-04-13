@@ -1,10 +1,10 @@
 import { MEDIABOX_FOLDER_PATH } from "./constants"
 
 import { platform } from "@tauri-apps/api/os"
-import { join } from "@tauri-apps/api/path"
+import { BaseDirectory, join } from "@tauri-apps/api/path"
 import { invoke } from "@tauri-apps/api"
 import { Command } from "@tauri-apps/api/shell"
-import { exists, removeFile } from "@tauri-apps/api/fs"
+import { createDir, exists, removeFile } from "@tauri-apps/api/fs"
 
 type Platforms = Awaited<ReturnType<typeof platform>>
 type ExecutableDownloadInfo = {
@@ -88,6 +88,7 @@ export const getPlatformInfo = async (info: ExecutableDownloadInfoList) => {
 }
 
 export const downloadExecutable = async (info: ExecutableDownloadInfo) => {
+  await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
   console.log("downloading executable", info)
 
   const currentPlatform = await platform()
