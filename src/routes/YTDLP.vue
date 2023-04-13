@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { nextTick, ref } from "vue"
 import { Command } from "@tauri-apps/api/shell"
-import { getClient, ResponseType } from "@tauri-apps/api/http"
-import { writeBinaryFile, BaseDirectory, createDir } from "@tauri-apps/api/fs"
 import { downloadDir, homeDir, join } from "@tauri-apps/api/path"
 import { platform } from "@tauri-apps/api/os"
+import { invoke } from "@tauri-apps/api"
 
 const outputLog = ref("")
 const logElement = ref<HTMLPreElement>()
@@ -19,8 +18,8 @@ const log = async (msg: string) => {
 }
 
 const downloadBinary = async () => {
+  const start = performance.now()
   const platformName = await platform()
-  const client = await getClient()
 
   const fileName = platformName === "win32" ? "yt-dlp.exe" : "yt-dlp"
   const downloadURL =
@@ -32,34 +31,31 @@ const downloadBinary = async () => {
 
   log(`downloading binary for ${platformName}`)
   log(`from ${downloadURL}`)
-  const request = await client.get(downloadURL, {
-    responseType: ResponseType.Binary,
-  })
 
-  if (!Array.isArray(request.data)) {
-    throw "request.data is not an array"
-  }
-
-  log(`writing binary to ${ytdlPath}`)
-  await createDir(".mediabox", { dir: BaseDirectory.Home, recursive: true })
-  await writeBinaryFile(`.mediabox/${fileName}`, request.data, {
-    dir: BaseDirectory.Home,
+  const resultPath = await invoke<string>("download_command", {
+    url: downloadURL,
+    path: ytdlPath,
   })
+  log(`wrote binary to ${resultPath}`)
 
   if (platformName !== "win32") {
     log(`setting permissions for ${ytdlPath}`)
 
     const chmod = new Command("chmod", ["+x", ytdlPath])
     chmod.on("close", data => {
-      outputLog.value += `\nchmod process exited with code ${data.code}`
+      log(`chmod process exited with code ${data.code}`)
     })
     await chmod.spawn()
   }
 
-  log("done")
+  const end = performance.now()
+  log(`done after ${(end - start) / 1000} seconds`)
 }
 
 const testYTDLP = async () => {
+  const start = performance.now()
+
+  log("testing yt-dlp...")
   const child = new Command("yt-dlp", ["--version"])
   child.stdout.on("data", data => {
     log(data)
@@ -69,6 +65,9 @@ const testYTDLP = async () => {
   })
   child.on("close", data => {
     log(`child process exited with code ${data.code}`)
+
+    const end = performance.now()
+    log(`done after ${(end - start) / 1000} seconds`)
   })
   await child.spawn()
 }

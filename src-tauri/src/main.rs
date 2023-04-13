@@ -16,6 +16,31 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+use reqwest::Error;
+
+async fn download_file(url: String, path: &str) -> Result<String, Error> {
+    let client = reqwest::Client::new();
+    let response = client.get(&url).send().await?;
+    let bytes = response.bytes().await?;
+    let mut file = std::fs::File::create(path).unwrap();
+    std::io::Write::write_all(&mut file, &bytes).unwrap();
+
+    // return the path on success
+    Ok(path.to_string())
+}
+
+#[tauri::command]
+async fn download_command(url: String, path: String) -> Result<String, String> {
+    let result = download_file(url, &path).await;
+    println!("{:?}", result);
+
+    // return the error as a string
+    match result {
+        Ok(path) => Ok(path),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -39,6 +64,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![download_command])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
