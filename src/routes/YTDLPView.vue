@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue"
 import { Command } from "@tauri-apps/api/shell"
-import { downloadDir } from "@tauri-apps/api/path"
+
 import { FFmpegInfo, YTDLPInfo, ensureExecutable } from "../download-executables"
 import { accumulatedLog, makeLogger } from "../logging"
+import { downloadVideoInfo, loadVideoInfo } from "../ytdlp"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")
@@ -73,28 +74,33 @@ const testYTDLP = async () => {
   await child.spawn()
 }
 
-const downloadVideo = async () => {
+const sampleVideoInfo = async () => {
   const url = "https://www.youtube.com/watch?v=9bZkp7q19f0"
-  ytdlpLog(`downloading ${url}...`)
+  const infoPath = await downloadVideoInfo(url)
+  const { title, id } = await loadVideoInfo(infoPath)
+  ytdlpLog({ title, id })
 
-  const downloadPath = await downloadDir()
-  const ffmpegPath = await ensureExecutable(FFmpegInfo)
-  const ytdlp = new Command("yt-dlp", [
-    "--ffmpeg-location",
-    ffmpegPath,
-    "--remux-video",
-    "mp4",
-    "-P",
-    downloadPath,
-    url,
-  ])
+  // ytdlpLog(`downloading ${url}...`)
 
-  ytdlp.stdout.on("data", ytdlpLog)
-  ytdlp.stderr.on("data", ytdlpLog)
-  ytdlp.on("close", data => {
-    ytdlpLog(`yt-dlp process exited with code ${data.code}`)
-  })
-  await ytdlp.spawn()
+  // const downloadPath = await downloadDir()
+  // const ffmpegPath = await ensureExecutable(FFmpegInfo)
+  // const ytdlp = new Command("yt-dlp", [
+  //   "--skip-download",
+  //   "--ffmpeg-location",
+  //   ffmpegPath,
+  //   "--remux-video",
+  //   "mp4",
+  //   "-P",
+  //   downloadPath,
+  //   url,
+  // ])
+
+  // ytdlp.stdout.on("data", ytdlpLog)
+  // ytdlp.stderr.on("data", ytdlpLog)
+  // ytdlp.on("close", data => {
+  //   ytdlpLog(`yt-dlp process exited with code ${data.code}`)
+  // })
+  // await ytdlp.spawn()
 }
 </script>
 
@@ -104,7 +110,7 @@ const downloadVideo = async () => {
     <div class="controls">
       <button @click="downloadYTDLP">download yt-dlp</button>
       <button @click="testYTDLP">test yt-dlp</button>
-      <button @click="downloadVideo">download sample video</button>
+      <button @click="sampleVideoInfo">download video info</button>
     </div>
     <div class="controls">
       <button @click="downloadFFmpeg">download ffmpeg</button>
