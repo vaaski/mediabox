@@ -1,5 +1,7 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// if anything in this file looks shit it's probably because
+// i have no idea how to write rust and barely got all this
+// working with the help of chatGPT, gpt-4 and github copilot
+// but hey it's pretty impressive nonetheless
 
 #![allow(unused_imports, unused_variables)]
 #![cfg_attr(
@@ -42,14 +44,31 @@ fn get_core_count() -> Result<u32, String> {
     Ok(num_cpus::get() as u32)
 }
 
+#[derive(Debug)]
+enum ExtractError {
+    FileNotFound(String),
+    Other(Box<dyn std::error::Error>),
+}
+
+impl std::fmt::Display for ExtractError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExtractError::FileNotFound(file) => write!(f, "File not found in archive: {}", file),
+            ExtractError::Other(err) => write!(f, "{}", err),
+        }
+    }
+}
+
+impl std::error::Error for ExtractError {}
+
 fn extract_files(
     zip_path: &str,
     files_to_extract: &[&str],
     output_paths: &[&str],
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), ExtractError> {
     // Open the zip archive
-    let reader = File::open(zip_path)?;
-    let mut archive = ZipArchive::new(reader)?;
+    let reader = File::open(zip_path).map_err(|err| ExtractError::Other(Box::new(err)))?;
+    let mut archive = ZipArchive::new(reader).map_err(|err| ExtractError::Other(Box::new(err)))?;
 
     let mut file_indices = Vec::new();
 
@@ -61,7 +80,7 @@ fn extract_files(
                 let file = archive.by_index(index).unwrap();
                 file.name().ends_with(file_to_extract)
             })
-            .expect("Failed to find file in archive");
+            .ok_or_else(|| ExtractError::FileNotFound(file_to_extract.to_string()))?;
 
         file_indices.push(file_index);
     }
@@ -69,14 +88,18 @@ fn extract_files(
     // Split archive into two separate variables for immutable and mutable borrow
     let mut output_files = Vec::new();
     for output_path in output_paths {
-        let output_file = File::create(output_path)?;
+        let output_file =
+            File::create(output_path).map_err(|err| ExtractError::Other(Box::new(err)))?;
         output_files.push(output_file);
     }
 
     // Copy the file contents
     for (i, file_index) in file_indices.iter().enumerate() {
-        let mut file_in_archive = archive.by_index(*file_index)?;
-        io::copy(&mut file_in_archive, &mut output_files[i])?;
+        let mut file_in_archive = archive
+            .by_index(*file_index)
+            .map_err(|err| ExtractError::Other(Box::new(err)))?;
+        io::copy(&mut file_in_archive, &mut output_files[i])
+            .map_err(|err| ExtractError::Other(Box::new(err)))?;
     }
 
     Ok(())
@@ -91,9 +114,7 @@ async fn tauri_extract_files(
     let files_to_extract: Vec<&str> = files_to_extract.iter().map(|s| s.as_str()).collect();
     let output_paths: Vec<&str> = output_paths.iter().map(|s| s.as_str()).collect();
 
-    let result = extract_files(&zip_path, &files_to_extract, &output_paths);
-
-    match result {
+    match extract_files(&zip_path, &files_to_extract, &output_paths) {
         Ok(()) => {
             let output_paths_string: Vec<String> =
                 output_paths.iter().map(|s| s.to_string()).collect();
