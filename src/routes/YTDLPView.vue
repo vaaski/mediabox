@@ -2,13 +2,19 @@
 import { nextTick, ref, watch } from "vue"
 
 import { accumulatedLog, makeLogger } from "../logging"
-import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
+// import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
 import { FFmpeg } from "../binary-dl/ffmpeg"
 import { commandOutput } from "../binary-dl/util"
 import { YtDlp } from "../binary-dl/yt-dlp"
+import {
+  downloadPresets,
+  downloadVideoFromInfoFile,
+  downloadVideoInfo,
+loadVideoInfo,
+} from "../binary-exec/yt-dlp"
 
 const ffmpegLog = makeLogger("ffmpeg")
-const ytdlpLog = makeLogger("ytdlp")
+const ytdlpLog = makeLogger("yt-dlp")
 
 const logElement = ref<HTMLPreElement>()
 watch(accumulatedLog, async () => {
@@ -61,12 +67,16 @@ const testYtDlp = async () => {
 
 const sampleVideoInfo = async () => {
   const url = "https://www.youtube.com/watch?v=9bZkp7q19f0"
-  const infoPath = await downloadVideoInfo(url)
-  const { title, id } = await loadVideoInfo(infoPath)
-  ytdlpLog({ title, id })
+  const preset = downloadPresets.fast720
 
-  ytdlpLog("downloading video from info")
-  await downloadVideoFromInfoFile(infoPath)
+  const infoPath = await downloadVideoInfo(url, preset.args)
+  ytdlpLog(`video info at ${infoPath}`)
+
+  const info = await loadVideoInfo(infoPath)
+  ytdlpLog(info.title, info.ext)
+
+  const path = await downloadVideoFromInfoFile(infoPath, preset.args)
+  ytdlpLog(path)
 }
 </script>
 
