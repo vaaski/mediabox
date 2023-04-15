@@ -34,12 +34,21 @@ a {
   }
 }
 
-button {
+button,
+input[type=text],
+select {
   font-family: "Outfit", sans-serif;
   background: rgba(0, 0, 0, 0.1);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0.5rem;
   margin-right: 0;
   border-radius: 5px;
   padding: 0.25em 0.5em;
+  outline: none;
+  transition: all 150ms ease-in-out;
+  appearance: none;
+
+  &:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
 }

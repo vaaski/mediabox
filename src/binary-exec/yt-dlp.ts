@@ -11,6 +11,8 @@ import { exists, readTextFile } from "@tauri-apps/api/fs"
 import { invoke } from "@tauri-apps/api"
 const ytdlpLog = makeLogger("binary-exec:yt-dlp")
 
+const PROGRESS_LOG_PREFIX = "[[PROGRESS]]"
+
 export const downloadVideoInfo = async (url: string, parameters: string[] = []) => {
   const downloadFolder = await MEDIABOX_FOLDER_PATH()
   const filename = "video"
@@ -62,7 +64,7 @@ export const loadVideoInfo = async (path: string) => {
 
 export const downloadPresets = {
   default: {
-    name: "default",
+    name: "default (max)",
     args: [],
   },
   fast720: {
@@ -99,6 +101,8 @@ export const downloadVideoFromInfoFile = async (
       coreCount.toString(),
       "-o",
       outputFile,
+      "--progress-template",
+      `${PROGRESS_LOG_PREFIX}%(progress)j`,
       ...parameters,
 
       "--load-info-json",

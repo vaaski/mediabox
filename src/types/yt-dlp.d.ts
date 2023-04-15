@@ -139,3 +139,23 @@ export type Thumbnail = {
   width?: number
   resolution?: string
 }
+
+export type DownloadProgress = {
+  filename: string
+  status: string
+  total_bytes: number
+  speed: number | null
+  _speed_str: string
+  _total_bytes_str: string
+  _elapsed_str: string
+  _percent_str: string
+  _default_template: string
+  downloaded_bytes?: number
+  tmpfilename?: string
+  eta?: number
+  elapsed?: number
+  ctx_id?: null
+  _eta_str?: string
+  _total_bytes_estimate_str?: string
+  _downloaded_bytes_str?: string
+}

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue"
+// import { nextTick, ref, watch } from "vue"
 
-import { accumulatedLog, makeLogger } from "../logging"
-// import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
+import { makeLogger } from "../logging"
 import { FFmpeg } from "../binary-dl/ffmpeg"
 import { commandOutput } from "../binary-dl/util"
 import { YtDlp } from "../binary-dl/yt-dlp"
@@ -10,26 +9,12 @@ import {
   downloadPresets,
   downloadVideoFromInfoFile,
   downloadVideoInfo,
-loadVideoInfo,
+  loadVideoInfo,
 } from "../binary-exec/yt-dlp"
+import { ref } from "vue"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("yt-dlp")
-
-const logElement = ref<HTMLPreElement>()
-watch(accumulatedLog, async () => {
-  if (!logElement.value) return
-
-  const isAtBottom =
-    logElement.value.scrollTop ===
-    logElement.value.scrollHeight - logElement.value.clientHeight
-
-  if (!isAtBottom) return
-
-  await nextTick()
-  logElement.value.scrollTop =
-    logElement.value.scrollHeight - logElement.value.clientHeight
-})
 
 const downloadFFmpeg = async () => {
   const commands = await FFmpeg.ensure()
@@ -78,12 +63,26 @@ const sampleVideoInfo = async () => {
   const path = await downloadVideoFromInfoFile(infoPath, preset.args)
   ytdlpLog(path)
 }
+
+const urlInput = ref("https://www.youtube.com/watch?v=Qq5Q1qKW-1g")
+const presetSelection = ref(downloadPresets.default)
+const downloadFromURL = async () => {
+  const parameters = presetSelection.value.args
+
+  const infoPath = await downloadVideoInfo(urlInput.value, parameters)
+  ytdlpLog(`video info at ${infoPath}`)
+
+  const info = await loadVideoInfo(infoPath)
+  ytdlpLog(info.title, info.ext)
+
+  const path = await downloadVideoFromInfoFile(infoPath, parameters)
+  ytdlpLog(path)
+}
 </script>
 
 <template>
   <div class="wrap">
-    <pre ref="logElement">{{ accumulatedLog }}</pre>
-    <div class="controls">
+    <!-- <div class="controls">
       <button @click="downloadYtDlp">download yt-dlp</button>
       <button @click="testYtDlp">test yt-dlp</button>
       <button @click="sampleVideoInfo">download video info</button>
@@ -91,7 +90,19 @@ const sampleVideoInfo = async () => {
     <div class="controls">
       <button @click="downloadFFmpeg">download ffmpeg</button>
       <button @click="testFFmpeg">test ffmpeg</button>
-    </div>
+    </div> -->
+
+    <form @submit.prevent="downloadFromURL">
+      <input v-model="urlInput" type="text" placeholder="url" />
+
+      <select v-model="presetSelection">
+        <option v-for="preset in downloadPresets" :key="preset.name" :value="preset">
+          {{ preset.name }}
+        </option>
+      </select>
+
+      <button type="submit">download</button>
+    </form>
   </div>
 </template>
 
@@ -101,18 +112,10 @@ const sampleVideoInfo = async () => {
   height: 100%;
   width: 100%;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-pre {
-  white-space: pre-wrap;
-  background: rgba(0, 0, 0, 0.1);
-  flex-grow: 1;
-  width: calc(100% - 1rem);
-  padding: 1em;
-  margin: 0.5rem;
-  margin-bottom: 0;
-  border-radius: 5px;
-  overflow-y: auto;
+form {
 }
 </style>
