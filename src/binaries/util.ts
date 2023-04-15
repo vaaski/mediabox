@@ -8,14 +8,18 @@ import { makeLogger } from "../logging"
 const log = makeLogger("binaries:util")
 
 export type Platforms = Awaited<ReturnType<typeof platform>>
-export type DownloadInfo = {
+export type DownloadInfoZip = {
   zipDownloads: string[]
   zipFileNames: string[]
   containedFileNames: string[]
   outFileNames: string[]
 }
-export type ExecutableDownloadInfoList = {
-  [key in Platforms]?: DownloadInfo
+export type DownloadInfoRaw = {
+  downloads : string[]
+  outFileNames: string[]
+}
+export type ExecutableDownloadInfoList<T extends DownloadInfoZip | DownloadInfoRaw> = {
+  [key in Platforms]?: T
 }
 
 export const download = async (url: string, path: string) => {

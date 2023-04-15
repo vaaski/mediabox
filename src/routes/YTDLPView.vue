@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue"
-import { Command } from "@tauri-apps/api/shell"
 
-import { YTDLPInfo, ensureExecutable } from "../download-executables"
 import { accumulatedLog, makeLogger } from "../logging"
 import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
 import { FFmpeg } from "../binaries/ffmpeg"
 import { commandOutput } from "../binaries/util"
+import { YtDlp } from "../binaries/yt-dlp"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")
@@ -43,29 +42,17 @@ const testFFmpeg = async () => {
   ffmpegLog(ffprobeOutput)
 }
 
-const downloadYTDLP = async () => {
-  const path = await ensureExecutable(YTDLPInfo)
-  ytdlpLog(`downloaded yt-dlp to ${path}`)
+const downloadYtDlp = async () => {
+  const path = await YtDlp.ensure()
+  ytdlpLog(`yt-dlp at ${path}`)
 }
 
-const testYTDLP = async () => {
-  const start = performance.now()
+const testYtDlp = async () => {
+  const ytDlp = await YtDlp.ensure()
 
-  ytdlpLog("testing yt-dlp...")
-  const child = new Command("yt-dlp", ["--version"])
-  child.stdout.on("data", data => {
-    ytdlpLog(data)
-  })
-  child.stderr.on("data", data => {
-    ytdlpLog(data)
-  })
-  child.on("close", data => {
-    ytdlpLog(`child process exited with code ${data.code}`)
-
-    const end = performance.now()
-    ytdlpLog(`done after ${(end - start) / 1000} seconds`)
-  })
-  await child.spawn()
+  ytdlpLog(`testing ${ytDlp}...`)
+  const output = await commandOutput(ytDlp, ["--version"])
+  ytdlpLog(output)
 }
 
 const sampleVideoInfo = async () => {
@@ -83,8 +70,8 @@ const sampleVideoInfo = async () => {
   <div class="wrap">
     <pre ref="logElement">{{ accumulatedLog }}</pre>
     <div class="controls">
-      <button @click="downloadYTDLP">download yt-dlp</button>
-      <button @click="testYTDLP">test yt-dlp</button>
+      <button @click="downloadYtDlp">download yt-dlp</button>
+      <button @click="testYtDlp">test yt-dlp</button>
       <button @click="sampleVideoInfo">download video info</button>
     </div>
     <div class="controls">

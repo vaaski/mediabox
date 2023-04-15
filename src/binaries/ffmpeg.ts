@@ -1,4 +1,4 @@
-import type { ExecutableDownloadInfoList } from "./util"
+import type { DownloadInfoZip, ExecutableDownloadInfoList } from "./util"
 
 import { platform } from "@tauri-apps/api/os"
 import { download, unzip, chmodPlusX, preexistingBinary } from "./util"
@@ -12,7 +12,7 @@ const log = makeLogger("binaries:ffmpeg")
 export const FFMPEG = 0
 export const FFPROBE = 1
 export type FFmpegBinaryType = ["ffmpeg", "ffprobe"] | ["ffmpeg-local", "ffprobe-local"]
-const downloadInfo: ExecutableDownloadInfoList = {
+const downloadInfo: ExecutableDownloadInfoList<DownloadInfoZip> = {
   darwin: {
     zipDownloads: [
       "https://evermeet.cx/ffmpeg/ffmpeg-6.0.zip",
