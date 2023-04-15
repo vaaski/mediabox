@@ -39,9 +39,14 @@
       "shell": {
         "execute": true,
         "scope": [
-          { "name": "ffmpeg", "cmd": "$HOME/.mediabox/ffmpeg", "args": true },
-          { "name": "yt-dlp", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
+          { "name": "ffmpeg", "cmd": "ffmpeg", "args": true },
+          { "name": "ffmpeg-local", "cmd": "$HOME/.mediabox/ffmpeg", "args": true },
+          { "name": "ffprobe", "cmd": "ffprobe", "args": true },
+          { "name": "ffprobe-local", "cmd": "$HOME/.mediabox/ffprobe", "args": true },
+          { "name": "yt-dlp", "cmd": "yt-dlp", "args": true },
+          { "name": "yt-dlp-local", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
           { "name": "chmod", "cmd": "chmod", "args": true },
+          { "name": "which", "cmd": "which", "args": true },
           { "name": "unzip", "cmd": "unzip", "args": true }
         ]
       },

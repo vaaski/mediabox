@@ -6,6 +6,7 @@ import { YTDLPInfo, ensureExecutable } from "../download-executables"
 import { accumulatedLog, makeLogger } from "../logging"
 import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
 import { FFmpeg } from "../binaries/ffmpeg"
+import { commandOutput } from "../binaries/util"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")
@@ -31,23 +32,15 @@ const downloadFFmpeg = async () => {
 }
 
 const testFFmpeg = async () => {
-  const start = performance.now()
+  const [ffmpeg, ffprobe] = await FFmpeg.ensure()
 
-  ffmpegLog("testing ffmpeg...")
-  const child = new Command("ffmpeg", ["-version"])
-  child.stdout.on("data", data => {
-    ffmpegLog(data)
-  })
-  child.stderr.on("data", data => {
-    ffmpegLog(data)
-  })
-  child.on("close", data => {
-    ffmpegLog(`child process exited with code ${data.code}`)
+  ffmpegLog(`testing ${ffmpeg}...`)
+  const ffmpegOutput = await commandOutput(ffmpeg, ["-version"])
+  ffmpegLog(ffmpegOutput)
 
-    const end = performance.now()
-    ffmpegLog(`done after ${(end - start) / 1000} seconds`)
-  })
-  await child.spawn()
+  ffmpegLog(`testing ${ffprobe}...`)
+  const ffprobeOutput = await commandOutput(ffprobe, ["-version"])
+  ffmpegLog(ffprobeOutput)
 }
 
 const downloadYTDLP = async () => {

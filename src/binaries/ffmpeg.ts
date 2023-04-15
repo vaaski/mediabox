@@ -1,7 +1,7 @@
 import type { ExecutableDownloadInfoList } from "./util"
 
 import { platform } from "@tauri-apps/api/os"
-import { download, unzip, chmodPlusX } from "./util"
+import { download, unzip, chmodPlusX, preexistingBinary } from "./util"
 import { makeLogger } from "../logging"
 import { join } from "@tauri-apps/api/path"
 import { MEDIABOX_FOLDER_PATH } from "../constants"
@@ -11,6 +11,7 @@ const log = makeLogger("binaries:ffmpeg")
 
 export const FFMPEG = 0
 export const FFPROBE = 1
+export type FFmpegBinaryType = ["ffmpeg", "ffprobe"] | ["ffmpeg-local", "ffprobe-local"]
 const downloadInfo: ExecutableDownloadInfoList = {
   darwin: {
     zipDownloads: [
@@ -24,7 +25,7 @@ const downloadInfo: ExecutableDownloadInfoList = {
 }
 
 export const FFmpeg = {
-  download: async () => {
+  download: async (): Promise<FFmpegBinaryType> => {
     const currentPlatform = await platform()
     const info = downloadInfo[currentPlatform]
     if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
@@ -57,14 +58,28 @@ export const FFmpeg = {
       await chmodPlusX(unzips)
     }
 
-    return unzips
+    return ["ffmpeg-local", "ffprobe-local"]
   },
-  ensure: async () => {
+  ensure: async (): Promise<FFmpegBinaryType> => {
     const MEDIABOX_PATH = await MEDIABOX_FOLDER_PATH()
     const currentPlatform = await platform()
 
     const info = downloadInfo[currentPlatform]
     if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
+
+    try {
+      const preexistingFFmpeg = await preexistingBinary(info.outFileNames[FFMPEG])
+      const preexistingFFprobe = await preexistingBinary(info.outFileNames[FFPROBE])
+
+      if (preexistingFFmpeg && preexistingFFprobe) {
+        log(
+          `using preexisting ffmpeg and ffprobe at ${preexistingFFmpeg} and ${preexistingFFprobe}`
+        )
+        return ["ffmpeg", "ffprobe"]
+      }
+    } catch {
+      // ignore
+    }
 
     const ffmpegOut = await join(MEDIABOX_PATH, info.outFileNames[FFMPEG])
     const ffprobeOut = await join(MEDIABOX_PATH, info.outFileNames[FFPROBE])
@@ -72,6 +87,8 @@ export const FFmpeg = {
     const ffmpegExists = await exists(ffmpegOut)
     const ffprobeExists = await exists(ffprobeOut)
 
-    return ffmpegExists && ffprobeExists ? [ffmpegOut, ffprobeOut] : FFmpeg.download()
+    return ffmpegExists && ffprobeExists
+      ? ["ffmpeg-local", "ffprobe-local"]
+      : FFmpeg.download()
   },
 }

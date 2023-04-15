@@ -32,14 +32,32 @@ export const unzip = async (zipPath: string, filesToExtract: string[]) => {
   return outPaths
 }
 
+export const commandOutput = async (command: string, parameters: string[]) => {
+  let accumulatedStdout = ""
+  let accumulatedStderr = ""
+
+  return new Promise<string>((resolve, reject) => {
+    const cmd = new Command(command, parameters)
+    cmd.on("close", () => resolve(accumulatedStdout))
+    cmd.on("error", () => reject(accumulatedStderr))
+
+    cmd.stdout.on("data", data => {
+      accumulatedStdout += data + "\n"
+    })
+    cmd.stderr.on("data", data => {
+      accumulatedStderr += data + "\n"
+    })
+
+    cmd.spawn()
+  })
+}
+
 export const chmodPlusX = async (paths: string[]) => {
   log(`chmod +x ${paths}`)
+  return await commandOutput("chmod", ["+x", ...paths])
+}
 
-  return new Promise<void>((resolve, reject) => {
-    const chmod = new Command("chmod", ["+x", ...paths])
-    chmod.on("close", resolve)
-    chmod.on("error", reject)
-
-    chmod.spawn()
-  })
+export const preexistingBinary = async (binary: string) => {
+  log(`which ${binary}`)
+  return await commandOutput("which", [binary])
 }
