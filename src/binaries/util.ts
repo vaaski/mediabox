@@ -42,8 +42,8 @@ export const commandOutput = async (command: string, parameters: string[]) => {
 
   return new Promise<string>((resolve, reject) => {
     const cmd = new Command(command, parameters)
-    cmd.on("close", () => resolve(accumulatedStdout))
-    cmd.on("error", () => reject(accumulatedStderr))
+    cmd.on("close", () => resolve(accumulatedStdout.trim()))
+    cmd.on("error", () => reject(accumulatedStderr.trim()))
 
     cmd.stdout.on("data", data => {
       accumulatedStdout += data + "\n"

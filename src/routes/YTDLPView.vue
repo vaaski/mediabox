@@ -26,8 +26,12 @@ watch(accumulatedLog, async () => {
 })
 
 const downloadFFmpeg = async () => {
-  const [ffmpeg, ffprobe] = await FFmpeg.ensure()
+  const commands = await FFmpeg.ensure()
+  const [ffmpeg, ffprobe] = commands
   ffmpegLog(`ffmpeg at ${ffmpeg}, ffprobe at ${ffprobe}`)
+
+  const binaryPaths = await FFmpeg.getDirectBinaryPath(commands)
+  ffmpegLog(binaryPaths)
 }
 
 const testFFmpeg = async () => {

@@ -6,6 +6,7 @@ import { makeLogger } from "../logging"
 import { join } from "@tauri-apps/api/path"
 import { MEDIABOX_FOLDER_PATH } from "../constants"
 import { exists, removeFile } from "@tauri-apps/api/fs"
+import { commandOutput } from "./util"
 
 const log = makeLogger("binaries:ffmpeg")
 
@@ -90,5 +91,26 @@ export const FFmpeg = {
     return ffmpegExists && ffprobeExists
       ? ["ffmpeg-local", "ffprobe-local"]
       : FFmpeg.download()
+  },
+  getDirectBinaryPath: async (binaryType: FFmpegBinaryType): Promise<string[]> => {
+    const MEDIABOX_PATH = await MEDIABOX_FOLDER_PATH()
+    const currentPlatform = await platform()
+
+    const info = downloadInfo[currentPlatform]
+    if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
+
+    if (binaryType[FFMPEG] === "ffmpeg") {
+      const pathPromises = info.outFileNames.map(name => commandOutput("which", [name]))
+      return await Promise.all(pathPromises)
+    } else {
+      const pathPromises = info.outFileNames.map(name => join(MEDIABOX_PATH, name))
+      return await Promise.all(pathPromises)
+    }
+  },
+  getBinaryFolder: async (binaryType: FFmpegBinaryType): Promise<string> => {
+    const [ffmpegBinaryPath] = await FFmpeg.getDirectBinaryPath(binaryType)
+    const ffFolder = await join(ffmpegBinaryPath, "..")
+
+    return ffFolder
   },
 }

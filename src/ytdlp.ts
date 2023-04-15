@@ -2,7 +2,8 @@ import { invoke } from "@tauri-apps/api"
 import { readTextFile } from "@tauri-apps/api/fs"
 import { downloadDir, join } from "@tauri-apps/api/path"
 import { Command } from "@tauri-apps/api/shell"
-import { ensureExecutable, FFmpegInfo } from "./download-executables"
+import { FFmpeg } from "./binaries/ffmpeg"
+import { YtDlp } from "./binaries/yt-dlp"
 
 import { makeLogger } from "./logging"
 const ytdlpLog = makeLogger("ytdlp")
@@ -10,14 +11,18 @@ const ytdlpLog = makeLogger("ytdlp")
 export const downloadVideoInfo = async (url: string) => {
   const downloadFolder = await downloadDir()
   const downloadPath = await join(downloadFolder, "video.info.json")
-  const ffmpegPath = await ensureExecutable(FFmpegInfo)
+
+  const ytDlp = await YtDlp.ensure()
+
+  const ffmpegCommands = await FFmpeg.ensure()
+  const ffFolder = await FFmpeg.getBinaryFolder(ffmpegCommands)
 
   return new Promise<string>((resolve, reject) => {
     ytdlpLog(`downloading ${url}...`)
 
-    const ytdlp = new Command("yt-dlp", [
+    const ytdlp = new Command(ytDlp, [
       "--ffmpeg-location",
-      ffmpegPath,
+      ffFolder,
       "-P",
       downloadFolder,
 
@@ -52,14 +57,19 @@ export const loadVideoInfo = async (path: string) => {
 
 export const downloadVideoFromInfoFile = async (infoJsonPath: string) => {
   const downloadFolder = await downloadDir()
-  const ffmpegPath = await ensureExecutable(FFmpegInfo)
+
+  const ytDlp = await YtDlp.ensure()
+
+  const ffmpegCommands = await FFmpeg.ensure()
+  const ffFolder = await FFmpeg.getBinaryFolder(ffmpegCommands)
+
   const coreCount = await invoke<number>("get_core_count")
   ytdlpLog(`core count: ${coreCount}`)
 
   return new Promise<void>((resolve, reject) => {
-    const ytdlp = new Command("yt-dlp", [
+    const ytdlp = new Command(ytDlp, [
       "--ffmpeg-location",
-      ffmpegPath,
+      ffFolder,
       "-P",
       downloadFolder,
       "-N",
