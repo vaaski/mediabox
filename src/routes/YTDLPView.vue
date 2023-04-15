@@ -2,9 +2,10 @@
 import { nextTick, ref, watch } from "vue"
 import { Command } from "@tauri-apps/api/shell"
 
-import { FFmpegInfo, YTDLPInfo, ensureExecutable } from "../download-executables"
+import { YTDLPInfo, ensureExecutable } from "../download-executables"
 import { accumulatedLog, makeLogger } from "../logging"
 import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
+import { FFmpeg } from "../binaries/ffmpeg"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")
@@ -25,8 +26,8 @@ watch(accumulatedLog, async () => {
 })
 
 const downloadFFmpeg = async () => {
-  const path = await ensureExecutable(FFmpegInfo)
-  ffmpegLog(`downloaded ffmpeg to ${path}`)
+  const [ffmpeg, ffprobe] = await FFmpeg.ensure()
+  ffmpegLog(`ffmpeg at ${ffmpeg}, ffprobe at ${ffprobe}`)
 }
 
 const testFFmpeg = async () => {

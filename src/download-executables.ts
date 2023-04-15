@@ -46,31 +46,33 @@ const download = async (url: string, path: string) => {
   return await invoke<string>("download_command", { url, path })
 }
 
-const unzip = async (zipPath: string, containedFileName: string) => {
+const unzip = async (zipPath: string, containedFileNames: string[]) => {
   const currentPlatform = await platform()
   const outFolder = await join(zipPath, "..")
-  const outPath = await join(outFolder, containedFileName)
-  log(`unzipping ${containedFileName} from ${zipPath} to ${outPath}`)
+  const outPaths = containedFileNames.map(async name => await join(outFolder, name))
+  log(`unzipping ${containedFileNames} from ${zipPath} to ${outPaths} on ${currentPlatform}`)
 
-  return new Promise<string>((resolve, reject) => {
-    if (currentPlatform === "darwin") {
-      const unzip = new Command("unzip", [
-        "-o", // overwrite
-        "-qq", // extra quiet
-        "-d", // destination folder
-        outFolder,
-        zipPath,
-        containedFileName,
-      ])
-      unzip.on("close", async () => {
-        await removeFile(zipPath)
-        return resolve(outPath)
-      })
-      unzip.on("error", reject)
+  return outPaths
 
-      unzip.spawn()
-    } else throw new Error("Unzipping not implemented for this platform")
-  })
+  // return new Promise<string>((resolve, reject) => {
+  //   if (currentPlatform === "darwin") {
+  //     const unzip = new Command("unzip", [
+  //       "-o", // overwrite
+  //       "-qq", // extra quiet
+  //       "-d", // destination folder
+  //       outFolder,
+  //       zipPath,
+  //       containedFileName,
+  //     ])
+  //     unzip.on("close", async () => {
+  //       await removeFile(zipPath)
+  //       return resolve(outPath)
+  //     })
+  //     unzip.on("error", reject)
+
+  //     unzip.spawn()
+  //   } else throw new Error("Unzipping not implemented for this platform")
+  // })
 }
 
 const chmodPlusX = async (path: string) => {
@@ -107,7 +109,7 @@ export const downloadExecutable = async (info: ExecutableDownloadInfo) => {
 
   let binaryPath = downloadPath
   if (info.zippedFilename) {
-    binaryPath = await unzip(downloadPath, info.filename)
+    binaryPath = await unzip(downloadPath, [info.filename])
     log("unzipped binary to", binaryPath)
   }
 
