@@ -8,7 +8,7 @@ import { MEDIABOX_FOLDER_PATH } from "../constants"
 import { exists, removeFile } from "@tauri-apps/api/fs"
 import { commandOutput } from "./util"
 
-const log = makeLogger("binaries:ffmpeg")
+const log = makeLogger("binary-dl:ffmpeg")
 
 export const FFMPEG = 0
 export const FFPROBE = 1

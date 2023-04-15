@@ -5,7 +5,7 @@ import { join } from "@tauri-apps/api/path"
 import { Command } from "@tauri-apps/api/shell"
 import { makeLogger } from "../logging"
 
-const log = makeLogger("binaries:util")
+const log = makeLogger("binary-dl:util")
 
 export type Platforms = Awaited<ReturnType<typeof platform>>
 export type DownloadInfoZip = {

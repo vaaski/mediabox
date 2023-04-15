@@ -7,7 +7,7 @@ import { join } from "@tauri-apps/api/path"
 import { MEDIABOX_FOLDER_PATH } from "../constants"
 import { exists } from "@tauri-apps/api/fs"
 
-const log = makeLogger("binaries:yt-dlp")
+const log = makeLogger("binary-dl:yt-dlp")
 
 export const YTDLP = 0
 export type YtDlpBinaryType = "yt-dlp" | "yt-dlp-local"
