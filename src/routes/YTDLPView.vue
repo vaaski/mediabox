@@ -3,9 +3,9 @@ import { nextTick, ref, watch } from "vue"
 
 import { accumulatedLog, makeLogger } from "../logging"
 import { downloadVideoFromInfoFile, downloadVideoInfo, loadVideoInfo } from "../ytdlp"
-import { FFmpeg } from "../binaries/ffmpeg"
-import { commandOutput } from "../binaries/util"
-import { YtDlp } from "../binaries/yt-dlp"
+import { FFmpeg } from "../binary-dl/ffmpeg"
+import { commandOutput } from "../binary-dl/util"
+import { YtDlp } from "../binary-dl/yt-dlp"
 
 const ffmpegLog = makeLogger("ffmpeg")
 const ytdlpLog = makeLogger("ytdlp")

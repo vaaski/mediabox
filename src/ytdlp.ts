@@ -2,8 +2,8 @@ import { invoke } from "@tauri-apps/api"
 import { readTextFile } from "@tauri-apps/api/fs"
 import { downloadDir, join } from "@tauri-apps/api/path"
 import { Command } from "@tauri-apps/api/shell"
-import { FFmpeg } from "./binaries/ffmpeg"
-import { YtDlp } from "./binaries/yt-dlp"
+import { FFmpeg } from "./binary-dl/ffmpeg"
+import { YtDlp } from "./binary-dl/yt-dlp"
 
 import { makeLogger } from "./logging"
 const ytdlpLog = makeLogger("ytdlp")
