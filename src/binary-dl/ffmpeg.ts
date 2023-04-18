@@ -1,4 +1,4 @@
-import type { DownloadInfoZip, ExecutableDownloadInfoList } from "./util"
+import type { DownloadInfoZip, ExecutableDownloadInfoList, Platforms } from "./util"
 
 import { platform } from "@tauri-apps/api/os"
 import { download, unzip, chmodPlusX, preexistingBinary } from "./util"
@@ -23,16 +23,21 @@ const downloadInfo: ExecutableDownloadInfoList<DownloadInfoZip> = {
     containedFileNames: ["ffmpeg", "ffprobe"],
     outFileNames: ["ffmpeg", "ffprobe"],
   },
+  win32: {
+    zipDownloads: ["https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"],
+    zipFileNames: ["ffmpeg-release-essentials.zip"],
+    containedFileNames: ["ffmpeg.exe", "ffprobe.exe"],
+    outFileNames: ["ffmpeg.exe", "ffprobe.exe"],
+  },
 }
 
-export const FFmpeg = {
-  download: async (): Promise<FFmpegBinaryType> => {
-    const currentPlatform = await platform()
-    const info = downloadInfo[currentPlatform]
-    if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
+type PlatformDownload = (
+  MEDIABOX_PATH: string,
+  info: DownloadInfoZip
+) => Promise<string[]>
 
-    const MEDIABOX_PATH = await MEDIABOX_FOLDER_PATH()
-
+const platformDownload: Partial<Record<Platforms, PlatformDownload>> = {
+  darwin: async (MEDIABOX_PATH, info) => {
     const ffmpegZipOut = await join(MEDIABOX_PATH, info.zipFileNames[FFMPEG])
     const ffprobeZipOut = await join(MEDIABOX_PATH, info.zipFileNames[FFPROBE])
     log(`downloading ${info.zipDownloads} to ${ffmpegZipOut} and ${ffprobeZipOut}`)
@@ -43,17 +48,52 @@ export const FFmpeg = {
     ])
     log(`downloaded ${zipDownloads}`)
 
-    const unzips = await Promise.all([
+    const unzipped = await Promise.all([
       unzip(zipDownloads[FFMPEG], [info.containedFileNames[FFMPEG]]),
       unzip(zipDownloads[FFPROBE], [info.containedFileNames[FFPROBE]]),
     ]).then(unzips => unzips.flat())
-    log(`unzipped ${unzips}`)
+    log(`unzipped ${unzipped}`)
 
     await Promise.all([
       removeFile(zipDownloads[FFMPEG]),
       removeFile(zipDownloads[FFPROBE]),
     ])
+
     log(`deleted zips ${zipDownloads}`)
+    return unzipped
+  },
+  win32: async (MEDIABOX_PATH, info) => {
+    const ffmpegZipOut = await join(MEDIABOX_PATH, info.zipFileNames[0])
+    log(`downloading ${info.zipDownloads} to ${ffmpegZipOut}`)
+
+    const zipDownload = await download(info.zipDownloads[0], ffmpegZipOut)
+    log(`downloaded ${zipDownload}`)
+
+    const unzipped = await unzip(zipDownload, [
+      info.containedFileNames[FFMPEG],
+      info.containedFileNames[FFPROBE],
+    ]).then(u => u.flat())
+    log(`unzipped ${unzipped}`)
+
+    await removeFile(zipDownload)
+
+    log(`deleted zip ${zipDownload}`)
+    return unzipped
+  },
+}
+
+export const FFmpeg = {
+  download: async (): Promise<FFmpegBinaryType> => {
+    const currentPlatform = await platform()
+    const info = downloadInfo[currentPlatform]
+    const downloader = platformDownload[currentPlatform]
+
+    if (!info || !downloader) {
+      throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
+    }
+
+    const MEDIABOX_PATH = await MEDIABOX_FOLDER_PATH()
+    const unzips = await downloader(MEDIABOX_PATH, info)
 
     if (currentPlatform !== "win32") {
       await chmodPlusX(unzips)
@@ -68,19 +108,19 @@ export const FFmpeg = {
     const info = downloadInfo[currentPlatform]
     if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
 
-    try {
-      const preexistingFFmpeg = await preexistingBinary(info.outFileNames[FFMPEG])
-      const preexistingFFprobe = await preexistingBinary(info.outFileNames[FFPROBE])
+    // try {
+    //   const preexistingFFmpeg = await preexistingBinary(info.outFileNames[FFMPEG])
+    //   const preexistingFFprobe = await preexistingBinary(info.outFileNames[FFPROBE])
 
-      if (preexistingFFmpeg && preexistingFFprobe) {
-        log(
-          `using preexisting ffmpeg and ffprobe at ${preexistingFFmpeg} and ${preexistingFFprobe}`
-        )
-        return ["ffmpeg", "ffprobe"]
-      }
-    } catch {
-      // ignore
-    }
+    //   if (preexistingFFmpeg && preexistingFFprobe) {
+    //     log(
+    //       `using preexisting ffmpeg and ffprobe at ${preexistingFFmpeg} and ${preexistingFFprobe}`
+    //     )
+    //     return ["ffmpeg", "ffprobe"]
+    //   }
+    // } catch {
+    //   // ignore
+    // }
 
     const ffmpegOut = await join(MEDIABOX_PATH, info.outFileNames[FFMPEG])
     const ffprobeOut = await join(MEDIABOX_PATH, info.outFileNames[FFPROBE])

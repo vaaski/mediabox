@@ -47,6 +47,7 @@
           { "name": "yt-dlp-local", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
           { "name": "chmod", "cmd": "chmod", "args": true },
           { "name": "which", "cmd": "which", "args": true },
+          { "name": "where", "cmd": "where", "args": true },
           { "name": "unzip", "cmd": "unzip", "args": true }
         ]
       },

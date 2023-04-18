@@ -1,4 +1,4 @@
-import type { platform } from "@tauri-apps/api/os"
+import { platform } from "@tauri-apps/api/os"
 
 import { invoke } from "@tauri-apps/api"
 import { join } from "@tauri-apps/api/path"
@@ -15,7 +15,7 @@ export type DownloadInfoZip = {
   outFileNames: string[]
 }
 export type DownloadInfoRaw = {
-  downloads : string[]
+  downloads: string[]
   outFileNames: string[]
 }
 export type ExecutableDownloadInfoList<T extends DownloadInfoZip | DownloadInfoRaw> = {
@@ -62,6 +62,9 @@ export const chmodPlusX = async (paths: string[]) => {
 }
 
 export const preexistingBinary = async (binary: string) => {
-  log(`which ${binary}`)
-  return await commandOutput("which", [binary])
+  const platformName = await platform()
+  const wh = platformName === "win32" ? "where" : "which"
+
+  log(`${wh} ${binary}`)
+  return await commandOutput(`${wh}`, [binary])
 }

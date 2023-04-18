@@ -16,6 +16,10 @@ const downloadInfo: ExecutableDownloadInfoList<DownloadInfoRaw> = {
     downloads: ["https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"],
     outFileNames: ["yt-dlp"],
   },
+  win32: {
+    downloads: ["https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"],
+    outFileNames: ["yt-dlp.exe"],
+  },
 }
 
 export const YtDlp = {

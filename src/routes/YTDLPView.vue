@@ -65,7 +65,7 @@ const sampleVideoInfo = async () => {
 }
 
 const urlInput = ref("https://www.youtube.com/watch?v=Qq5Q1qKW-1g")
-const presetSelection = ref(downloadPresets.default)
+const presetSelection = ref(downloadPresets.fast720)
 const downloadFromURL = async () => {
   const parameters = presetSelection.value.args
 
