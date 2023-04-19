@@ -37,6 +37,7 @@ a {
 button,
 input[type="text"],
 select {
+  appearance: none;
   font-family: "Outfit", sans-serif;
   background: rgba(0, 0, 0, 0.1);
   border: none;
@@ -47,7 +48,6 @@ select {
   padding: 0.25em 0.5em;
   outline: none;
   transition: all 150ms ease-in-out;
-  appearance: none;
 
   &:focus {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
@@ -56,4 +56,8 @@ select {
   &:not(input[type="text"]):active {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 1);
   }
+}
+
+.win32 option {
+  color: black;
 }
