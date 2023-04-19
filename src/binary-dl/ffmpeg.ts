@@ -108,19 +108,22 @@ export const FFmpeg = {
     const info = downloadInfo[currentPlatform]
     if (!info) throw new Error(`Unsupported platform for ffmpeg: ${currentPlatform}`)
 
-    // try {
-    //   const preexistingFFmpeg = await preexistingBinary(info.outFileNames[FFMPEG])
-    //   const preexistingFFprobe = await preexistingBinary(info.outFileNames[FFPROBE])
+    // TODO: fix on windows
+    if (currentPlatform !== "win32") {
+      try {
+        const preexistingFFmpeg = await preexistingBinary(info.outFileNames[FFMPEG])
+        const preexistingFFprobe = await preexistingBinary(info.outFileNames[FFPROBE])
 
-    //   if (preexistingFFmpeg && preexistingFFprobe) {
-    //     log(
-    //       `using preexisting ffmpeg and ffprobe at ${preexistingFFmpeg} and ${preexistingFFprobe}`
-    //     )
-    //     return ["ffmpeg", "ffprobe"]
-    //   }
-    // } catch {
-    //   // ignore
-    // }
+        if (preexistingFFmpeg && preexistingFFprobe) {
+          log(
+            `using preexisting ffmpeg and ffprobe at ${preexistingFFmpeg} and ${preexistingFFprobe}`
+          )
+          return ["ffmpeg", "ffprobe"]
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     const ffmpegOut = await join(MEDIABOX_PATH, info.outFileNames[FFMPEG])
     const ffprobeOut = await join(MEDIABOX_PATH, info.outFileNames[FFPROBE])
