@@ -62,7 +62,11 @@ export const loadVideoInfo = async (path: string) => {
   return json as YtDLPInfo
 }
 
-export const downloadPresets = {
+type DownloadPreset = {
+  name: string
+  args: string[]
+}
+export const downloadPresets: Record<string, DownloadPreset> = {
   default: {
     name: "default (max)",
     args: [],
@@ -70,6 +74,10 @@ export const downloadPresets = {
   fast720: {
     name: "fast (up to 720p)",
     args: ["-f", "b"],
+  },
+  mp3: {
+    name: "mp3",
+    args: ["-x", "--audio-format", "mp3"],
   },
 }
 
