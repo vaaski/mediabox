@@ -7,9 +7,10 @@ import { platformName } from "../util"
     <h1>mediabox PoC ({{ platformName }})</h1>
     <div class="links">
       <RouterLink to="/ytdlp">download</RouterLink>
-      <RouterLink to="/log">logs</RouterLink>
-      <RouterLink disabled title="coming soon™" to="/ytdlp">transform</RouterLink>
+      <RouterLink to="/transform">transform</RouterLink>
       <RouterLink disabled title="coming soon™" to="/ytdlp">transfer</RouterLink>
+
+      <RouterLink to="/log">logs</RouterLink>
     </div>
   </main>
 </template>

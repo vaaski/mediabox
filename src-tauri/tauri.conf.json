@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "pnpm dev",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
@@ -13,49 +13,48 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "startDragging": true
-      },
-      "http": {
-        "request": true,
-        "scope": ["https://github.com/*"]
+      "dialog": {
+        "open": true
       },
       "fs": {
         "all": false,
         "createDir": true,
-        "removeFile": true,
+        "exists": true,
         "readFile": true,
-        "scope": ["$HOME/.mediabox", "$HOME/.mediabox/*", "$DOWNLOAD/*"],
-        "exists": true
+        "removeFile": true,
+        "scope": ["$HOME/.mediabox", "$HOME/.mediabox/*", "$DOWNLOAD/*"]
       },
-      "shell": {
-        "execute": true,
-        "scope": [
-          { "name": "ffmpeg", "cmd": "ffmpeg", "args": true },
-          { "name": "ffmpeg-local", "cmd": "$HOME/.mediabox/ffmpeg", "args": true },
-          { "name": "ffprobe", "cmd": "ffprobe", "args": true },
-          { "name": "ffprobe-local", "cmd": "$HOME/.mediabox/ffprobe", "args": true },
-          { "name": "yt-dlp", "cmd": "yt-dlp", "args": true },
-          { "name": "yt-dlp-local", "cmd": "$HOME/.mediabox/yt-dlp", "args": true },
-          { "name": "chmod", "cmd": "chmod", "args": true },
-          { "name": "which", "cmd": "which", "args": true },
-          { "name": "where", "cmd": "where", "args": true },
-          { "name": "unzip", "cmd": "unzip", "args": true }
-        ]
+      "os": {
+        "all": true
       },
       "path": {
         "all": true
       },
-      "os": {
-        "all": true
+      "shell": {
+        "execute": true,
+        "scope": [
+          { "args": true, "cmd": "ffmpeg", "name": "ffmpeg" },
+          { "args": true, "cmd": "$HOME/.mediabox/ffmpeg", "name": "ffmpeg-local" },
+          { "args": true, "cmd": "ffprobe", "name": "ffprobe" },
+          { "args": true, "cmd": "$HOME/.mediabox/ffprobe", "name": "ffprobe-local" },
+          { "args": true, "cmd": "yt-dlp", "name": "yt-dlp" },
+          { "args": true, "cmd": "$HOME/.mediabox/yt-dlp", "name": "yt-dlp-local" },
+          { "args": true, "cmd": "chmod", "name": "chmod" },
+          { "args": true, "cmd": "which", "name": "which" },
+          { "args": true, "cmd": "where", "name": "where" },
+          { "args": true, "cmd": "unzip", "name": "unzip" }
+        ]
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "maximize": true,
+        "minimize": true,
+        "show": true,
+        "startDragging": true,
+        "unmaximize": true,
+        "unminimize": true
       }
     },
     "bundle": {
@@ -77,13 +76,13 @@
     "windows": [
       {
         "fullscreen": false,
+        "height": 550,
+        "hiddenTitle": true,
         "resizable": true,
         "title": "mediabox",
-        "width": 830,
-        "height": 550,
-        "transparent": true,
         "titleBarStyle": "Overlay",
-        "hiddenTitle": true
+        "transparent": true,
+        "width": 830
       }
     ]
   }

@@ -2,14 +2,16 @@ import type { RouteRecordRaw } from "vue-router"
 
 import { createWebHashHistory, createRouter } from "vue-router"
 
-import HomeVue from "./routes/HomeView.vue"
-import YtdlpVue from "./routes/YTDLPView.vue"
-import LogVue from "./routes/LogView.vue"
+import HomeView from "./routes/HomeView.vue"
+import YtdlpView from "./routes/YTDLPView.vue"
+import LogView from "./routes/LogView.vue"
+import TransformView from "./routes/TransformView.vue"
 
 const routes: RouteRecordRaw[] = [
-  { path: "/", component: HomeVue },
-  { path: "/ytdlp", component: YtdlpVue },
-  { path: "/log", component: LogVue },
+  { path: "/", component: HomeView },
+  { path: "/ytdlp", component: YtdlpView },
+  { path: "/log", component: LogView },
+  { path: "/transform", component: TransformView },
 ]
 
 export const router = createRouter({
