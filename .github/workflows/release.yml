@@ -31,18 +31,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: install frontend dependencies
-        if: matrix.platform == 'windows-latest'
-        run: yarn install
-
       - uses: oven-sh/setup-bun@v1
         if: matrix.platform != 'windows-latest'
         with:
           bun-version: latest
 
-      - name: install dependencies
+      - name: install dependencies with bun
         if: matrix.platform != 'windows-latest'
         run: bun install
+
+      - name: install dependencies with npm (windows only)
+        if: matrix.platform == 'windows-latest'
+        run: npm install
 
       - uses: tauri-apps/tauri-action@v0
         env:
